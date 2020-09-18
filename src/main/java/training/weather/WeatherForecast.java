@@ -7,8 +7,11 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import com.google.api.client.json.Json;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import training.weather.clients.RequestClient;
 import training.weather.utils.DateUtils;
 
 public class WeatherForecast {
@@ -18,17 +21,10 @@ public class WeatherForecast {
 			datetime = new Date();
 		}
 		if (datetime.before(DateUtils.AddDays(new Date(),7))) {
-			HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory();
-			HttpRequest request = requestFactory
-				.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/search/?query=" + city));
-			String rawResponse = request.execute().parseAsString();
-			JSONArray jsonArray = new JSONArray(rawResponse);
+			RequestClient client = new RequestClient();
+			JSONArray jsonArray = new JSONArray(client.Get("https://www.metaweather.com/api/location/search/?query=" + city));
 			String cityId = jsonArray.getJSONObject(0).get("woeid").toString();
-			requestFactory = new NetHttpTransport().createRequestFactory();
-			request = requestFactory
-				.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/" + cityId));
-			rawResponse = request.execute().parseAsString();
-			JSONArray results = new JSONObject(rawResponse).getJSONArray("consolidated_weather");
+			JSONArray results = new JSONObject(client.Get("https://www.metaweather.com/api/location/" + cityId)).getJSONArray("consolidated_weather");
 			for (int i = 0; i < results.length(); i++) {
 				if (DateUtils.FormatDate("yyyy-MM-dd", datetime)
 					.equals(results.getJSONObject(i).get("applicable_date").toString())) {
