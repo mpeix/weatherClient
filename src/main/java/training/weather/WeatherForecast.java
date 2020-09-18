@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import training.weather.utils.DateUtils;
 
 public class WeatherForecast {
 
@@ -16,7 +17,7 @@ public class WeatherForecast {
 		if (datetime == null) {
 			datetime = new Date();
 		}
-		if (datetime.before(new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 6)))) {
+		if (datetime.before(DateUtils.AddDays(new Date(),7))) {
 			HttpRequestFactory requestFactory = new NetHttpTransport().createRequestFactory();
 			HttpRequest request = requestFactory
 				.buildGetRequest(new GenericUrl("https://www.metaweather.com/api/location/search/?query=" + city));
@@ -29,7 +30,7 @@ public class WeatherForecast {
 			rawResponse = request.execute().parseAsString();
 			JSONArray results = new JSONObject(rawResponse).getJSONArray("consolidated_weather");
 			for (int i = 0; i < results.length(); i++) {
-				if (new SimpleDateFormat("yyyy-MM-dd").format(datetime)
+				if (DateUtils.FormatDate("yyyy-MM-dd", datetime)
 					.equals(results.getJSONObject(i).get("applicable_date").toString())) {
 					return results.getJSONObject(i).get("weather_state_name").toString();
 				}
