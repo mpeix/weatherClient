@@ -1,14 +1,7 @@
 package training.weather;
 
-import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestFactory;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import com.google.api.client.json.Json;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import training.weather.clients.RequestClient;
