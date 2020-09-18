@@ -5,6 +5,7 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import training.weather.clients.RequestClient;
+import training.weather.utils.Constants;
 import training.weather.utils.DateUtils;
 import training.weather.utils.JsonUtils;
 
@@ -14,15 +15,17 @@ public class WeatherForecast {
 		if (datetime == null) {
 			datetime = new Date();
 		}
-		if (datetime.before(DateUtils.AddDays(new Date(),7))) {
-			RequestClient client = new RequestClient();
-			JSONArray jsonArray = new JSONArray(client.Get("https://www.metaweather.com/api/location/search/?query=" + city));
-			String cityId = JsonUtils.GetJsonValue(jsonArray.getJSONObject(0),"woeid");
-			JSONArray results = new JSONObject(client.Get("https://www.metaweather.com/api/location/" + cityId)).getJSONArray("consolidated_weather");
+		if (datetime.before(DateUtils.AddDays(new Date(),Constants.ForecastDays))) {
+			RequestClient reqClient = new RequestClient();
+			JSONArray cityInfo = new JSONArray(reqClient.Get(Constants.SearchUrl + city));
+			if(cityInfo.length() > 0){
+				String cityId = JsonUtils.GetJsonValue(cityInfo.getJSONObject(0), Constants.CityIdKey);
+				JSONArray results = new JSONObject(reqClient.Get(Constants.LocationUrl + cityId)).getJSONArray(Constants.ConsolidatedKey);
 
-			String dateFormatted = DateUtils.FormatDate("yyyy-MM-dd", datetime);
-			JSONObject requestedDayWeather = JsonUtils.GetJsonObjectFromKeyValue(results,"applicable_date", dateFormatted);
-			return JsonUtils.GetJsonValue(requestedDayWeather,"weather_state_name" );
+				String dateFormatted = DateUtils.FormatDate(Constants.ApplicableDateFormat, datetime);
+				JSONObject requestedDayWeather = JsonUtils.GetJsonObjectFromKeyValue(results,Constants.ApplicableDateKey, dateFormatted);
+				return JsonUtils.GetJsonValue(requestedDayWeather, Constants.WeatherStateNameKey);
+			}
 		}
 		return "";
 	}
